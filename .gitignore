@@ -1,10 +1,25 @@
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
 .env
 venv/
+.venv/
 
 backend/config.py
+backend/data/
+
+*.json
+*.db
+*.sqlite
 
 node_modules/
+
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+.DS_Store
+Thumbs.db
