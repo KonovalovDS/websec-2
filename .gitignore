@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+
+backend/config.py
+
+node_modules/
