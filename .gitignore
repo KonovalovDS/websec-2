@@ -8,7 +8,7 @@ venv/
 .venv/
 
 # Конфиг с ключами
-backend/config.py
+backend/.env
 .env
 
 # Кэш и данные
@@ -33,3 +33,4 @@ Thumbs.db
 
 # Логи
 *.log
+logs/

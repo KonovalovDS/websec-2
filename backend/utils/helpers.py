@@ -24,13 +24,11 @@ def format_time(time_str: str) -> str:
     if not time_str:
         return '??:??'
     
-    # ISO-формат с датой
     if 'T' in time_str:
         time_part = time_str.split('T')[1]
         if time_part:
             return time_part[:5]
     
-    # Просто время
     if ':' in time_str:
         return time_str[:5]
     

@@ -1,10 +1,17 @@
-// ============================================
-// Модуль отображения расписания
-// ============================================
+/**
+ * Модуль отображения расписания
+ * @module schedule
+ * @deprecated Логика перенесена в app.js, файл можно удалить
+ */
 
 import { api } from './api_client.js';
 
 export class ScheduleRenderer {
+    /**
+     * @param {string} containerSelector - Селектор контейнера
+     * @param {string} titleSelector - Селектор заголовка
+     * @param {string} controlsSelector - Селектор кнопок управления
+     */
     constructor(containerSelector, titleSelector, controlsSelector) {
         this.container = $(containerSelector);
         this.title = $(titleSelector);
@@ -18,6 +25,8 @@ export class ScheduleRenderer {
     
     /**
      * Отобразить расписание по станции
+     * @param {string} stationCode - Код станции
+     * @param {string} stationTitle - Название станции
      */
     async showSchedule(stationCode, stationTitle) {
         this.currentStation = { code: stationCode, title: stationTitle };
@@ -36,6 +45,8 @@ export class ScheduleRenderer {
     
     /**
      * Отобразить маршрут между станциями
+     * @param {Object} fromStation - Станция отправления
+     * @param {Object} toStation - Станция назначения
      */
     async showRoute(fromStation, toStation) {
         this.currentStation = null;
@@ -52,13 +63,14 @@ export class ScheduleRenderer {
     }
     
     /**
-     * Отрисовка расписания — БЕЗ СОРТИРОВКИ
+     * Отрисовка расписания
+     * @param {Array} segments - Список сегментов расписания
+     * @param {string} stationTitle - Название станции
+     * @private
      */
     _renderSchedule(segments, stationTitle) {
-        // 🔥 СКРЫВАЕМ индикатор загрузки
         this.loading.addClass('hidden');
         this.error.addClass('hidden');
-        
         this.container.empty();
         
         if (!segments || !segments.length) {
@@ -98,13 +110,15 @@ export class ScheduleRenderer {
     }
     
     /**
-     * Отрисовка маршрута — БЕЗ СОРТИРОВКИ, БЕЗ ПЛАТФОРМЫ "?"
+     * Отрисовка маршрута
+     * @param {Array} segments - Список сегментов маршрута
+     * @param {Object} fromStation - Станция отправления
+     * @param {Object} toStation - Станция назначения
+     * @private
      */
     _renderRoute(segments, fromStation, toStation) {
-        // 🔥 СКРЫВАЕМ индикатор загрузки
         this.loading.addClass('hidden');
         this.error.addClass('hidden');
-        
         this.container.empty();
         
         if (!segments || !segments.length) {
@@ -145,16 +159,15 @@ export class ScheduleRenderer {
             
             const train = seg.thread || {};
             
-            // 🔥 БЕЗ ПЛАТФОРМЫ — только время и информация
             return `
-                <article class="schedule-item" style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; align-items: center;">
-                    <time class="schedule-time" style="font-weight: 700; font-size: 1.2rem; color: #667eea;">
+                <article class="schedule-item route-view">
+                    <time class="schedule-time">
                         ${this._fmtTime(depTime)} → ${this._fmtTime(arrTime)}
                     </time>
-                    <div class="schedule-info" style="display: flex; flex-direction: column; gap: 0.25rem;">
-                        <div class="train-name" style="font-weight: 600;">${this._esc(train.short_title || train.name || 'Электричка')}</div>
-                        <div class="route" style="color: #666; font-size: 0.9rem;">${this._esc(fromStation.title)} → ${this._esc(toStation.title)}</div>
-                        ${seg.days ? `<div style="font-size:0.8rem;color:#666">${this._esc(seg.days)}</div>` : ''}
+                    <div class="schedule-info">
+                        <div class="train-name">${this._esc(train.short_title || train.name || 'Электричка')}</div>
+                        <div class="route">${this._esc(fromStation.title)} → ${this._esc(toStation.title)}</div>
+                        ${seg.days ? `<div class="route-days">${this._esc(seg.days)}</div>` : ''}
                     </div>
                 </article>
             `;
@@ -165,29 +178,27 @@ export class ScheduleRenderer {
     
     /**
      * Форматирование времени
+     * @param {string} timeStr - Строка времени
+     * @returns {string}
+     * @private
      */
     _fmtTime(timeStr) {
         if (!timeStr) return '??:??';
-        
-        // Формат: "2026-03-29T14:30:00+03:00"
         if (typeof timeStr === 'string' && timeStr.includes('T')) {
             const timePart = timeStr.split('T')[1];
-            if (timePart) {
-                return timePart.substring(0, 5);
-            }
+            if (timePart) return timePart.substring(0, 5);
         }
-        
-        // Формат: "14:30" или "14:30:00"
         if (typeof timeStr === 'string' && timeStr.includes(':')) {
             return timeStr.substring(0, 5);
         }
-        
-        // Любой другой формат
         return String(timeStr).substring(0, 5) || '??:??';
     }
     
     /**
      * Экранирование HTML
+     * @param {string} str - Строка для экранирования
+     * @returns {string}
+     * @private
      */
     _esc(str) {
         if (!str) return '';
@@ -198,6 +209,7 @@ export class ScheduleRenderer {
     
     /**
      * Показать индикатор загрузки
+     * @private
      */
     _showLoading() {
         this.container.empty();
@@ -207,6 +219,8 @@ export class ScheduleRenderer {
     
     /**
      * Показать ошибку
+     * @param {string} message - Текст ошибки
+     * @private
      */
     _showError(message) {
         this.loading.addClass('hidden');
@@ -216,6 +230,7 @@ export class ScheduleRenderer {
     
     /**
      * Настроить обработчик кнопки "Избранное"
+     * @param {Function} handler - Callback
      */
     onFavoriteClick(handler) {
         this.favBtn.off('click').on('click', handler);
@@ -223,6 +238,7 @@ export class ScheduleRenderer {
     
     /**
      * Обновить иконку избранного
+     * @param {boolean} isFavorite - Статус избранного
      */
     setFavoriteIcon(isFavorite) {
         this.favBtn.text(isFavorite ? '★' : '☆');
@@ -231,8 +247,9 @@ export class ScheduleRenderer {
     
     /**
      * Получить текущую станцию
+     * @returns {Object|null}
      */
     getCurrentStation() {
         return this.currentStation;
     }
-}
+}   

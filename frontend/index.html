@@ -23,11 +23,10 @@
   <main class="container" role="main">
     
     <!-- Поиск станции -->
-    <section class="main-section search-section">
+    <section class="main-section search-section" aria-label="Поиск станции">
       <h2 class="section-title">🔍 Поиск станции</h2>
       
       <div class="search-group">
-        <!-- 🔥 Обёртка для input + кнопка -->
         <div class="input-with-icon">
           <input type="text" id="station-input" class="search-input" 
                 placeholder="Название станции..." autocomplete="off">
@@ -38,13 +37,16 @@
         <button id="search-btn" class="btn btn-primary">Найти</button>
       </div>
       
+      <button id="map-toggle-btn" class="btn btn-secondary" style="margin-top: 0.75rem; width: 100%;">
+        🗺️ Показать на карте
+      </button>
+      
       <div id="search-results" class="search-results hidden"></div>
       <div id="directions-container" class="directions-container hidden"></div>
-      <button id="map-toggle-btn" class="btn btn-secondary">🗺️ Карта</button>
     </section>
 
     <!-- Маршруты -->
-    <section class="main-section route-section">
+    <section class="main-section route-section" aria-label="Маршруты">
       <h2 class="section-title">🔎 Маршруты</h2>
       
       <div class="route-group">
@@ -52,7 +54,7 @@
           <label for="from-input" class="input-label">Откуда</label>
           <div class="input-with-icon">
             <input type="text" id="from-input" class="route-input" 
-                  placeholder="Станция отправления" autocomplete="off">
+                   placeholder="Станция отправления" autocomplete="off">
             <button type="button" id="fav-from-btn" class="btn-fav-icon hidden" title="В избранное">
               <span class="fav-icon">☆</span>
             </button>
@@ -63,7 +65,7 @@
           <label for="to-input" class="input-label">Куда</label>
           <div class="input-with-icon">
             <input type="text" id="to-input" class="route-input" 
-                  placeholder="Станция назначения" autocomplete="off">
+                   placeholder="Станция назначения" autocomplete="off">
             <button type="button" id="fav-to-btn" class="btn-fav-icon hidden" title="В избранное">
               <span class="fav-icon">☆</span>
             </button>
@@ -76,15 +78,15 @@
       <div id="route-results" class="route-results"></div>
     </section>
 
-    <!-- 🔥 Секция карты (скрыта по умолчанию) -->
+    <!-- Карта -->
     <section id="map-section" class="map-section hidden" aria-label="Карта">
       <div class="map-wrapper">
         <div id="map" class="map-container"></div>
-        <button id="map-close-btn" class="btn btn-close" type="button">✕</button>
+        <button id="map-close-btn" class="btn btn-close" type="button" aria-label="Закрыть карту">✕</button>
       </div>
     </section>
 
-    <!-- 🔥 Секция избранного -->
+    <!-- Избранное -->
     <aside class="favorites-panel" aria-label="Избранные станции">
       <h3 class="panel-title">⭐ Избранное</h3>
       <ul id="favorites-list" class="favorites-list"></ul>
@@ -94,12 +96,12 @@
 
   <!-- Подвал сайта -->
   <footer class="footer">
-    <p>Данные: <a href="https://yandex.ru/dev/rasp/" target="_blank">Яндекс.Расписания</a></p>
+    <p>Данные: <a href="https://yandex.ru/dev/rasp/" target="_blank" rel="noopener">Яндекс.Расписания</a></p>
   </footer>
 
   <!-- Библиотеки -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js" crossorigin="anonymous"></script>
   
   <!-- Модули приложения -->
   <script type="module" src="js/config.js"></script>

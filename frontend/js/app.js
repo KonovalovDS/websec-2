@@ -1,6 +1,7 @@
-// ============================================
-// Главный модуль приложения — точка входа
-// ============================================
+/**
+ * Главный модуль приложения — точка входа
+ * @module app
+ */
 
 import { api } from './api_client.js';
 import { StationMap } from './map.js';
@@ -10,14 +11,19 @@ import { FavoritesManager } from './favorites.js';
 $(document).ready(() => {
     const favorites = new FavoritesManager();
     
-    // 🔥 Текущие выбранные станции
+    // Текущие выбранные станции
     let currentStation = null;
     let currentFromStation = null;
     let currentToStation = null;
     
+    // Карта
+    let map = null;
+    const $mapSection = $('#map-section');
+    
     // Основной поиск станции
     const search = new StationSearch(
-        '#station-input', '#search-results',
+        '#station-input',
+        '#search-results',
         (station) => {
             currentStation = station;
             _loadStationDirections(station);
@@ -30,7 +36,8 @@ $(document).ready(() => {
     
     // Поиск для поля "Откуда" (маршруты)
     const fromSearch = new StationSearch(
-        '#from-input', '#from-results',
+        '#from-input',
+        '#from-results',
         (station) => {
             currentFromStation = station;
             _updateRouteFavButtons();
@@ -39,16 +46,13 @@ $(document).ready(() => {
     
     // Поиск для поля "Куда" (маршруты)
     const toSearch = new StationSearch(
-        '#to-input', '#to-results',
+        '#to-input',
+        '#to-results',
         (station) => {
             currentToStation = station;
             _updateRouteFavButtons();
         }
     );
-    
-    // Карта
-    let map = null;
-    const $mapSection = $('#map-section');
     
     // Показать карту
     $('#map-toggle-btn').on('click', async () => {
@@ -62,6 +66,8 @@ $(document).ready(() => {
                 _updateFavButton($('#fav-add-btn'), station);
             });
             map.init();
+        } else {
+            map.centerOnStation(55.7558, 37.6176, CONFIG.MAP.ZOOM);
         }
         
         try {
@@ -77,14 +83,14 @@ $(document).ready(() => {
         $mapSection.addClass('hidden');
     });
     
-    // 🔥 Кнопка избранного для поиска
+    // Кнопка избранного для поиска
     $('#fav-add-btn').on('click', () => {
         if (currentStation) {
             _toggleFavorite(currentStation);
         }
     });
     
-    // 🔥 Кнопки избранного для маршрута
+    // Кнопки избранного для маршрута
     $('#fav-from-btn').on('click', () => {
         if (currentFromStation) {
             _toggleFavorite(currentFromStation);
@@ -102,9 +108,18 @@ $(document).ready(() => {
         const from = fromSearch.getSelected();
         const to = toSearch.getSelected();
         
-        if (!from) { alert('Выберите станцию отправления из списка'); return; }
-        if (!to) { alert('Выберите станцию назначения из списка'); return; }
-        if (from.code === to.code) { alert('Станции не должны совпадать'); return; }
+        if (!from) {
+            alert('Выберите станцию отправления из списка');
+            return;
+        }
+        if (!to) {
+            alert('Выберите станцию назначения из списка');
+            return;
+        }
+        if (from.code === to.code) {
+            alert('Станции не должны совпадать');
+            return;
+        }
         
         await _loadRouteResults(from, to);
     });
@@ -119,7 +134,7 @@ $(document).ready(() => {
         }
     });
     
-    // Избранное — 🔥 ДОБАВЛЕНО: onRemove callback
+    // Избранное
     function _renderFavorites() {
         favorites.renderToList(
             $('#favorites-list'),
@@ -129,39 +144,36 @@ $(document).ready(() => {
                 _loadStationDirections(station);
                 _updateFavButton($('#fav-add-btn'), station);
             },
-            // 🔥 НОВЫЙ CALLBACK: после удаления обновляем ВСЕ кнопки
             (removedCode) => {
-                console.log('🗑️ Станция удалена:', removedCode);
-                
-                // Обновляем кнопку в поиске
                 _updateFavButton($('#fav-add-btn'), currentStation);
-                
-                // Обновляем кнопки в маршрутах
                 _updateRouteFavButtons();
-                
-                console.log('✅ Кнопки обновлены');
             }
         );
     }
     
-    // 🔥 Загрузка направлений станции
+    // Загрузка направлений станции
     async function _loadStationDirections(station) {
         const $container = $('#directions-container');
         $container.empty().addClass('hidden');
         
         try {
             const data = await api.getSchedule(station.code);
-            const segments = data.schedule || [];
+            const segments = data.segments || data.schedule || [];
+            
+            console.log('📥 Schedule response:', { 
+                hasSegments: !!data.segments, 
+                hasSchedule: !!data.schedule, 
+                count: segments.length 
+            });
             
             if (!segments.length) {
                 $container.html('<p class="no-results">Нет рейсов на сегодня</p>').removeClass('hidden');
                 return;
             }
             
-            // Группировка по направлениям
             const directionsMap = new Map();
             segments.forEach((seg) => {
-                const direction = seg.direction || '';
+                const direction = seg.direction || seg.thread?.direction || '';
                 if (!direction || direction.toLowerCase() === 'прибытие') return;
                 directionsMap.set(direction, (directionsMap.get(direction) || 0) + 1);
             });
@@ -169,6 +181,8 @@ $(document).ready(() => {
             const directions = Array.from(directionsMap.entries())
                 .map(([direction, count]) => ({ direction, count }))
                 .sort((a, b) => b.count - a.count);
+            
+            console.log('🧭 Directions found:', directions);
             
             if (!directions.length) {
                 $container.html('<p class="no-results">Нет направлений отправления</p>').removeClass('hidden');
@@ -192,16 +206,19 @@ $(document).ready(() => {
             });
             
         } catch (e) {
+            console.error('❌ Error loading directions:', e);
             $container.html(`<p class="error">Ошибка: ${e.message}</p>`).removeClass('hidden');
         }
     }
     
-    // 🔥 Показать расписание по направлению
+    // Показать расписание по направлению
     function _showDirectionSchedule(station, direction, allSegments) {
         const $container = $('#directions-container');
-        const filtered = allSegments.filter(seg => 
-            seg.direction === direction && seg.direction?.toLowerCase() !== 'прибытие'
-        );
+        
+        const filtered = allSegments.filter(seg => {
+            const segDirection = seg.direction || seg.thread?.direction || '';
+            return segDirection === direction && segDirection?.toLowerCase() !== 'прибытие';
+        });
         
         let html = `
             <h3 class="directions-title">
@@ -211,7 +228,8 @@ $(document).ready(() => {
         `;
         
         html += filtered.map((seg) => {
-            const depTime = seg.departure || '??:??';
+            const depTime = seg.departure || seg.departure_time || seg.time || '??:??';
+            
             return `
                 <div class="direction-item" style="cursor:default;">
                     <span class="direction-name"><strong>${_fmtTime(depTime)}</strong></span>
@@ -224,7 +242,7 @@ $(document).ready(() => {
         $('#back-to-directions').on('click', () => _loadStationDirections(station));
     }
     
-    // 🔥 Загрузка результатов маршрута
+    // Загрузка результатов маршрута
     async function _loadRouteResults(from, to) {
         const $container = $('#route-results');
         $container.empty().html('<p class="loading">⏳ Загрузка...</p>');
@@ -248,7 +266,7 @@ $(document).ready(() => {
                 const depTime = seg.departure || '??:??';
                 const arrTime = seg.arrival || '??:??';
                 return `
-                    <div class="schedule-item">
+                    <div class="schedule-item route-view">
                         <span class="schedule-time">
                             <strong>${_fmtTime(depTime)}</strong> → ${_fmtTime(arrTime)}
                         </span>
@@ -261,8 +279,6 @@ $(document).ready(() => {
             }).join('');
             
             $container.html(html);
-            
-            // 🔥 После загрузки маршрута обновляем кнопки избранного
             _updateRouteFavButtons();
             
         } catch (e) {
@@ -270,9 +286,7 @@ $(document).ready(() => {
         }
     }
     
-    /**
-     * Обновить вид кнопки избранного
-     */
+    // Обновить вид кнопки избранного
     function _updateFavButton($btn, station) {
         if (!station) {
             $btn.addClass('hidden');
@@ -284,15 +298,19 @@ $(document).ready(() => {
         
         $btn.toggleClass('active', isFav);
         $btn.find('.fav-icon').text(isFav ? '★' : '☆');
-        // 🔥 Убрали .fav-text так как теперь только иконка
     }
     
-    /**
-     * Обновить кнопки избранного для маршрута
-     */
+    // Обновить кнопки избранного для маршрута
     function _updateRouteFavButtons() {
         currentFromStation = fromSearch.getSelected();
         currentToStation = toSearch.getSelected();
+        
+        if (!currentFromStation && !currentToStation) {
+            $('#route-fav-buttons').addClass('hidden');
+            return;
+        }
+        
+        $('#route-fav-buttons').removeClass('hidden');
         
         // Кнопка "Откуда"
         if (currentFromStation) {
@@ -317,9 +335,7 @@ $(document).ready(() => {
         }
     }
     
-    /**
-     * Переключить статус избранного для станции
-     */
+    // Переключить статус избранного для станции
     function _toggleFavorite(station) {
         if (!station) return;
         
@@ -329,16 +345,12 @@ $(document).ready(() => {
             favorites.add(station);
         }
         
-        // Обновляем все кнопки
         _updateFavButton($('#fav-add-btn'), currentStation);
         _updateRouteFavButtons();
         _renderFavorites();
     }
     
-    // ============================================
-    // Вспомогательные функции
-    // ============================================
-    
+    // Экранирование HTML
     function _esc(str) {
         if (!str) return '';
         const d = document.createElement('div');
@@ -346,6 +358,7 @@ $(document).ready(() => {
         return d.innerHTML;
     }
     
+    // Форматирование времени
     function _fmtTime(timeStr) {
         if (!timeStr) return '??:??';
         if (typeof timeStr === 'string' && timeStr.includes('T')) {
@@ -357,6 +370,7 @@ $(document).ready(() => {
         return String(timeStr).substring(0, 5) || '??:??';
     }
     
+    // Склонение русских слов
     function _declension(number, one, two, five) {
         const n = number % 100;
         const n1 = n % 10;
@@ -367,13 +381,9 @@ $(document).ready(() => {
     }
     
     // Проверка сервера
-    api.healthCheck()
-        .then((data) => {
-            console.log('✅ Сервер работает:', data.status);
-        })
-        .catch((e) => {
-            console.warn('⚠️ Сервер недоступен:', e.message);
-        });
+    api.healthCheck().catch((e) => {
+        console.warn('⚠️ Сервер недоступен:', e.message);
+    });
     
     // Инициализация
     _renderFavorites();

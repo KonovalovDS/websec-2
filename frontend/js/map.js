@@ -1,11 +1,16 @@
-// ============================================
-// Модуль карты на OpenLayers — УПРОЩЁННЫЙ
-// ============================================
+/**
+ * Модуль карты на OpenLayers
+ * @module map
+ */
 
 import { CONFIG } from './config.js';
 import { api } from './api_client.js';
 
 export class StationMap {
+    /**
+     * @param {string} containerId - ID контейнера карты
+     * @param {Function} onSelectStation - Callback при клике на маркер
+     */
     constructor(containerId, onSelectStation) {
         this.containerId = containerId;
         this.onSelectStation = onSelectStation;
@@ -17,14 +22,19 @@ export class StationMap {
      * Инициализация карты
      */
     init() {
-        console.log('🗺️ Инициализация карты...');
+        if (typeof ol === 'undefined') {
+            console.error('❌ OpenLayers not loaded');
+            return;
+        }
+        
+        const moscowCoords = ol.proj.fromLonLat([37.6176, 55.7558]);
         
         this.map = new ol.Map({
             target: this.containerId,
             layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
             view: new ol.View({
-                center: ol.proj.fromLonLat([37.6176, 55.7558]),  // 🔥 Москва (статично)
-                zoom: 7,  // 🔥 Статичный зум
+                center: moscowCoords,
+                zoom: CONFIG.MAP.ZOOM,
                 minZoom: CONFIG.MAP.MIN_ZOOM,
                 maxZoom: CONFIG.MAP.MAX_ZOOM
             })
@@ -36,7 +46,6 @@ export class StationMap {
         });
         this.map.addLayer(this.stationsLayer);
         
-        // Клик по маркеру
         this.map.on('click', (evt) => {
             const feature = this.map.forEachFeatureAtPixel(evt.pixel, f => f);
             if (feature?.get('stationCode')) {
@@ -49,11 +58,18 @@ export class StationMap {
             }
         });
         
-        console.log('✅ Карта инициализирована (центр: Москва)');
+        setTimeout(() => {
+            if (this.map) {
+                this.map.getView().setCenter(moscowCoords);
+                this.map.getView().setZoom(CONFIG.MAP.ZOOM);
+            }
+        }, 100);
     }
     
     /**
      * Стиль маркеров — только точки
+     * @returns {ol.style.Style}
+     * @private
      */
     _createStyle() {
         return new ol.style.Style({
@@ -66,27 +82,17 @@ export class StationMap {
     }
     
     /**
-     * Показать маркеры станций на карте — 🔥 БЕЗ fit(), БЕЗ АВТО-ЦЕНТРОВКИ
+     * Показать маркеры станций на карте
+     * @param {Array} stations - Список станций
      */
     async showStations(stations) {
-        console.log('🗺️ Загрузка станций на карту...');
-        
         const source = this.stationsLayer.getSource();
         source.clear();
         
         const list = stations || await this._loadAllStations();
         
-        console.log('📊 Всего станций:', list.length);
-        
-        let addedCount = 0;
-        let skippedCount = 0;
-        
         for (const s of list) {
-            // Пропускаем станции без координат
-            if (!s.lat || !s.lon || !s.code) {
-                skippedCount++;
-                continue;
-            }
+            if (!s.lat || !s.lon || !s.code) continue;
             
             source.addFeature(new ol.Feature({
                 geometry: new ol.geom.Point(ol.proj.fromLonLat([s.lon, s.lat])),
@@ -95,48 +101,34 @@ export class StationMap {
                 lat: s.lat,
                 lon: s.lon
             }));
-            
-            addedCount++;
         }
-        
-        console.log(`✅ Добавлено: ${addedCount}, ⚠️ Пропущено: ${skippedCount}`);
-        console.log('📍 Карта остаётся на Москве (зум 7)');
-        
-        // 🔥 УБРАНО: fit() и авто-центровка
-        // Карта остаётся там, где была (Москва по умолчанию)
     }
     
     /**
      * Загрузить все станции с API
+     * @returns {Promise<Array>}
+     * @private
      */
     async _loadAllStations() {
         try {
-            console.log('📡 Загрузка станций с API...');
             const response = await fetch(`${CONFIG.API_BASE}/stations/all`);
             const data = await response.json();
-            console.log('📥 Получено:', data.stations?.length || 0);
             return data.stations || [];
         } catch (e) {
-            console.error('❌ Ошибка:', e);
+            console.error('Error loading stations:', e);
             return [];
         }
     }
     
     /**
      * Центрировать карту на конкретной станции
+     * @param {number} lat - Широта
+     * @param {number} lon - Долгота
+     * @param {number} zoom - Уровень зума
      */
     centerOnStation(lat, lon, zoom = 12) {
-        console.log('🎯 Центрирование:', { lat, lon, zoom });
-        
-        if (!lat || !lon) {
-            console.error('❌ Нет координат для центрирования');
-            return;
-        }
-        
-        const center = ol.proj.fromLonLat([lon, lat]);
-        console.log('📍 OpenLayers координаты:', center);
-        
-        this.map.getView().setCenter(center);
+        if (!lat || !lon) return;
+        this.map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
         this.map.getView().setZoom(zoom);
     }
     
@@ -144,7 +136,6 @@ export class StationMap {
      * Очистить все маркеры
      */
     clear() {
-        console.log('🗑️ Очистка карты');
         this.stationsLayer?.getSource().clear();
     }
 }
