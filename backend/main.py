@@ -14,11 +14,8 @@ from config import (
 )
 from yandex_api import YandexRaspClient
 
-# Инициализация приложения
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
-
-# Инициализация клиента API
 yandex_client = YandexRaspClient(YANDEX_API_KEY)
 
 

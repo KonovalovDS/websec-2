@@ -242,7 +242,7 @@ $(document).ready(() => {
         });
     }
     
-    // 🔥 Загрузка результатов маршрута
+    // 🔥 Загрузка результатов маршрута — С ВРЕМЕНЕМ ПРИБЫТИЯ
     async function _loadRouteResults(from, to) {
         console.log('🔎 Загрузка маршрута:', { from, to });
         
@@ -276,14 +276,15 @@ $(document).ready(() => {
                 </h3>
             `;
             
-            // Список рейсов (только время отправления, без arrival)
+            // 🔥 Список рейсов — ТЕПЕРЬ С ВРЕМЕНЕМ ОТПРАВЛЕНИЯ И ПРИБЫТИЯ
             html += segments.slice(0, 20).map((seg) => {
                 const depTime = seg.departure || '??:??';
+                const arrTime = seg.arrival || '??:??';
                 
                 return `
                     <div class="schedule-item">
                         <span class="schedule-time">
-                            <strong>${_fmtTime(depTime)}</strong>
+                            <strong>${_fmtTime(depTime)}</strong> → ${_fmtTime(arrTime)}
                         </span>
                         <div class="schedule-info">
                             <div class="train-name">${_esc(seg.thread?.short_title || seg.thread?.name || 'Электричка')}</div>

@@ -1,68 +1,115 @@
-// Модуль избранного
+// ============================================
+// Модуль избранного (localStorage)
+// ============================================
+
 import { CONFIG } from './config.js';
 
 export class FavoritesManager {
-    constructor(key = CONFIG.STORAGE.FAVORITES_KEY) {
-        this.key = key;
+    constructor(storageKey = CONFIG.STORAGE.FAVORITES_KEY) {
+        this.storageKey = storageKey;
     }
     
     _load() {
         try {
-            const raw = localStorage.getItem(this.key);
+            const raw = localStorage.getItem(this.storageKey);
             return raw ? JSON.parse(raw) : [];
-        } catch { return []; }
+        } catch (e) {
+            console.error('Favorites load error:', e);
+            return [];
+        }
     }
     
-    _save(list) {
-        localStorage.setItem(this.key, JSON.stringify(list));
+    _save(favorites) {
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(favorites));
+        } catch (e) {
+            console.error('Favorites save error:', e);
+        }
     }
     
-    add(s) {
-        const list = this._load();
-        if (!list.some(x => x.code === s.code)) {
-            list.push({ ...s, added: Date.now() });
-            this._save(list);
+    add(station) {
+        const favorites = this._load();
+        
+        // Проверка на дубликаты
+        if (!favorites.some((s) => s.code === station.code)) {
+            favorites.push({
+                code: station.code,
+                title: station.title,
+                lat: station.lat || null,
+                lon: station.lon || null,
+                added: Date.now()
+            });
+            this._save(favorites);
             return true;
         }
         return false;
     }
     
-    remove(code) {
-        this._save(this._load().filter(x => x.code !== code));
+    remove(stationCode) {
+        const favorites = this._load().filter((s) => s.code !== stationCode);
+        this._save(favorites);
     }
     
-    isFavorite(code) {
-        return this._load().some(x => x.code === code);
+    isFavorite(stationCode) {
+        return this._load().some((s) => s.code === stationCode);
     }
     
     getAll() {
         return this._load().sort((a, b) => b.added - a.added);
     }
     
-    renderToList($el, onSelect) {
-        const list = this.getAll();
-        if (!list.length) {
-            $el.html('<li class="no-results">Пусто</li>');
+    /**
+     * Отобразить список избранного в элементе
+     * 🔥 ИСПРАВЛЕНО: используем data-атрибуты вместо text()
+     */
+    renderToList($listElement, onSelect) {
+        const favorites = this.getAll();
+        
+        if (!favorites.length) {
+            $listElement.html('<li class="favorites-empty">Нет избранных станций</li>');
             return;
         }
-        $el.html(list.map(s => `
-            <li>
-                <button type="button" data-code="${this._esc(s.code)}">
-                    ${this._esc(s.title)}
-                </button>
-            </li>
-        `).join(''));
-        $el.find('button').on('click', (e) => {
+        
+        // 🔥 ИСПРАВЛЕНО: храним данные в data-атрибутах
+        const html = favorites.map((s) => {
+            return `
+                <li>
+                    <button 
+                        type="button"
+                        data-code="${this._esc(s.code)}"
+                        data-title="${this._esc(s.title)}"
+                        data-lat="${s.lat || ''}"
+                        data-lon="${s.lon || ''}">
+                        ${this._esc(s.title)}
+                    </button>
+                </li>
+            `;
+        }).join('');
+        
+        $listElement.html(html);
+        
+        // 🔥 ИСПРАВЛЕНО: берем данные из data-атрибутов, а не из text()
+        $listElement.find('button').on('click', (e) => {
             const $btn = $(e.currentTarget);
-            onSelect({ code: $btn.data('code'), title: $btn.text() });
+            const station = {
+                code: $btn.data('code'),
+                title: $btn.data('title'),
+                lat: $btn.data('lat'),
+                lon: $btn.data('lon')
+            };
+            console.log('⭐ Клик по избранному:', station);
+            onSelect(station);
         });
     }
     
     _esc(str) {
-        const d = document.createElement('div');
-        d.textContent = str || '';
-        return d.innerHTML;
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
     
-    clear() { localStorage.removeItem(this.key); }
+    clear() {
+        localStorage.removeItem(this.storageKey);
+    }
 }

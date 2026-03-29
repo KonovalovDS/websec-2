@@ -1,25 +1,35 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyo
-.env
+*.env
 venv/
 .venv/
 
+# Конфиг с ключами
 backend/config.py
-backend/data/
+.env
 
+# Кэш и данные
+backend/data/
 *.json
 *.db
 *.sqlite
 
+# Node modules
 node_modules/
 
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
+# OS
 .DS_Store
 Thumbs.db
+
+# Логи
+*.log

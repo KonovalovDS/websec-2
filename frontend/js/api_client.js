@@ -1,4 +1,3 @@
-// Класс для работы с бэкенд-API
 import { CONFIG } from './config.js';
 
 export class ApiClient {
@@ -27,7 +26,7 @@ export class ApiClient {
     }
     
     searchRoute(fromCode, toCode, date = null) {
-        return this._request('/route', { from: fromCode, to: toCode, date });
+        return this._request('/route', { from: fromCode, to: toCode });
     }
     
     searchStations(query) {
