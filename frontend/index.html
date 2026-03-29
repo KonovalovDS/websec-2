@@ -22,46 +22,57 @@
   <!-- Основной контент -->
   <main class="container" role="main">
     
-    <!-- 🔥 РАЗДЕЛ 1: Поиск станции с направлениями -->
-    <section class="main-section search-section" aria-label="Поиск станции">
+    <!-- Поиск станции -->
+    <section class="main-section search-section">
       <h2 class="section-title">🔍 Поиск станции</h2>
       
       <div class="search-group">
-        <input type="text" id="station-input" class="search-input" 
-               placeholder="Название станции..." autocomplete="off">
-        <button id="search-btn" class="btn btn-primary" type="button">Найти</button>
+        <!-- 🔥 Обёртка для input + кнопка -->
+        <div class="input-with-icon">
+          <input type="text" id="station-input" class="search-input" 
+                placeholder="Название станции..." autocomplete="off">
+          <button type="button" id="fav-add-btn" class="btn-fav-icon hidden" title="В избранное">
+            <span class="fav-icon">☆</span>
+          </button>
+        </div>
+        <button id="search-btn" class="btn btn-primary">Найти</button>
       </div>
-      <div id="search-results" class="search-results hidden" role="listbox"></div>
       
-      <button id="map-toggle-btn" class="btn btn-secondary" type="button" style="margin-top: 1rem;">
-        🗺️ Показать на карте
-      </button>
-
-      <!-- Контейнер для направлений -->
+      <div id="search-results" class="search-results hidden"></div>
       <div id="directions-container" class="directions-container hidden"></div>
+      <button id="map-toggle-btn" class="btn btn-secondary">🗺️ Карта</button>
     </section>
 
-    <!-- 🔥 РАЗДЕЛ 2: Маршруты между станциями -->
-    <section class="main-section route-section" aria-label="Маршруты">
+    <!-- Маршруты -->
+    <section class="main-section route-section">
       <h2 class="section-title">🔎 Маршруты</h2>
       
       <div class="route-group">
         <div class="input-wrapper">
           <label for="from-input" class="input-label">Откуда</label>
-          <input type="text" id="from-input" class="route-input" 
-                 placeholder="Станция отправления" autocomplete="off">
-          <div id="from-results" class="search-results hidden" role="listbox"></div>
+          <div class="input-with-icon">
+            <input type="text" id="from-input" class="route-input" 
+                  placeholder="Станция отправления" autocomplete="off">
+            <button type="button" id="fav-from-btn" class="btn-fav-icon hidden" title="В избранное">
+              <span class="fav-icon">☆</span>
+            </button>
+          </div>
+          <div id="from-results" class="search-results hidden"></div>
         </div>
         <div class="input-wrapper">
           <label for="to-input" class="input-label">Куда</label>
-          <input type="text" id="to-input" class="route-input" 
-                 placeholder="Станция назначения" autocomplete="off">
-          <div id="to-results" class="search-results hidden" role="listbox"></div>
+          <div class="input-with-icon">
+            <input type="text" id="to-input" class="route-input" 
+                  placeholder="Станция назначения" autocomplete="off">
+            <button type="button" id="fav-to-btn" class="btn-fav-icon hidden" title="В избранное">
+              <span class="fav-icon">☆</span>
+            </button>
+          </div>
+          <div id="to-results" class="search-results hidden"></div>
         </div>
-        <button id="route-btn" class="btn btn-primary" type="button">Найти маршрут</button>
+        <button id="route-btn" class="btn btn-primary">Найти маршрут</button>
       </div>
       
-      <!-- Результаты маршрута выводятся здесь же -->
       <div id="route-results" class="route-results"></div>
     </section>
 

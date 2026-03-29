@@ -30,7 +30,6 @@ export class FavoritesManager {
     add(station) {
         const favorites = this._load();
         
-        // Проверка на дубликаты
         if (!favorites.some((s) => s.code === station.code)) {
             favorites.push({
                 code: station.code,
@@ -59,10 +58,10 @@ export class FavoritesManager {
     }
     
     /**
-     * Отобразить список избранного в элементе
-     * 🔥 ИСПРАВЛЕНО: используем data-атрибуты вместо text()
+     * Отобразить список избранного
+     * 🔥 ДОБАВЛЕНО: onRemove callback
      */
-    renderToList($listElement, onSelect) {
+    renderToList($listElement, onSelect, onRemove) {
         const favorites = this.getAll();
         
         if (!favorites.length) {
@@ -70,17 +69,24 @@ export class FavoritesManager {
             return;
         }
         
-        // 🔥 ИСПРАВЛЕНО: храним данные в data-атрибутах
         const html = favorites.map((s) => {
             return `
-                <li>
+                <li class="favorite-item">
                     <button 
                         type="button"
+                        class="station-btn"
                         data-code="${this._esc(s.code)}"
                         data-title="${this._esc(s.title)}"
                         data-lat="${s.lat || ''}"
                         data-lon="${s.lon || ''}">
                         ${this._esc(s.title)}
+                    </button>
+                    <button 
+                        type="button"
+                        class="btn-remove"
+                        data-code="${this._esc(s.code)}"
+                        title="Удалить из избранного">
+                        Удалить
                     </button>
                 </li>
             `;
@@ -88,8 +94,8 @@ export class FavoritesManager {
         
         $listElement.html(html);
         
-        // 🔥 ИСПРАВЛЕНО: берем данные из data-атрибутов, а не из text()
-        $listElement.find('button').on('click', (e) => {
+        // Клик по названию станции
+        $listElement.find('.station-btn').on('click', (e) => {
             const $btn = $(e.currentTarget);
             const station = {
                 code: $btn.data('code'),
@@ -97,8 +103,22 @@ export class FavoritesManager {
                 lat: $btn.data('lat'),
                 lon: $btn.data('lon')
             };
-            console.log('⭐ Клик по избранному:', station);
             onSelect(station);
+        });
+        
+        // 🔥 Клик по кнопке удаления — вызываем onRemove callback
+        $listElement.find('.btn-remove').on('click', (e) => {
+            e.stopPropagation();
+            const $btn = $(e.currentTarget);
+            const code = $btn.data('code');
+            
+            this.remove(code);
+            this.renderToList($listElement, onSelect, onRemove);
+            
+            // 🔥 Вызываем callback чтобы обновить кнопки в app.js
+            if (onRemove) {
+                onRemove(code);
+            }
         });
     }
     
