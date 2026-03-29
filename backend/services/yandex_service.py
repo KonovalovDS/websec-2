@@ -57,20 +57,51 @@ class YandexRaspService:
             data = response.json()
             
             if 'error' in data:
-                logger.error(f"API Error: {data['error']}")
-                raise ValueError(data['error'])
-            
+                api_error = data['error']
+                logger.error(f"Yandex API error: {api_error}")
+                logger.debug(f"Full error response: {data}")
+                error_msg = str(api_error).lower()
+                
+                if 'invalid key' in error_msg or 'apikey' in error_msg:
+                    raise ValueError("Неверный API-ключ")
+                elif 'forbidden' in error_msg or 'access denied' in error_msg:
+                    raise ValueError("Доступ запрещён")
+                elif 'limit' in error_msg or 'quota' in error_msg:
+                    raise ValueError("Превышен лимит запросов")
+                elif 'not found' in error_msg:
+                    raise ValueError("Данные не найдены")
+                else:
+                    raise ValueError("Ошибка при получении данных от Яндекс.Расписаний")
+
             return data
-            
+                
         except requests.exceptions.Timeout:
             logger.error(f"Timeout > {timeout}s for {endpoint}")
-            raise
+            raise TimeoutError(f"Превышено время ожидания ({timeout}с)")
+            
         except requests.exceptions.ConnectionError:
             logger.error(f"Connection error for {endpoint}")
-            raise
+            raise ConnectionError("Не удалось соединиться с сервером Яндекс.Расписаний")
+            
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code if e.response else 'unknown'
+            logger.error(f"HTTP {status} error for {endpoint}")
+            
+            if status == 401:
+                raise ValueError("Неверный API-ключ")
+            elif status == 403:
+                raise ValueError("Доступ запрещён (проверьте лимиты API)")
+            elif status == 404:
+                raise ValueError("Эндпоинт не найден")
+            elif status == 429:
+                raise ValueError("Превышен лимит запросов")
+            else:
+                raise ValueError(f"Ошибка сервера ({status})")
+                
         except Exception as e:
-            logger.error(f"Request error: {type(e).__name__}: {e}")
-            raise
+            logger.error(f"Unexpected error: {type(e).__name__}: {e}")
+            logger.debug("Full traceback:", exc_info=True)
+            raise RuntimeError("Внутренняя ошибка при запросе к Яндекс.Расписаниям")
     
     def get_schedule(self, station_code: str, date: Optional[str] = None) -> List[Dict]:
         """Получить расписание по станции (только suburban)"""
