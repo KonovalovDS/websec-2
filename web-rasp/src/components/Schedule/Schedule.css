@@ -1,0 +1,238 @@
+.schedule-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.schedule-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.favorite-toggle-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 1.25rem;
+  color: #999;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.favorite-toggle-btn:hover {
+  color: #1976d2;
+  border-color: #1976d2;
+  background: #e3f2fd;
+}
+
+.favorite-toggle-btn.active {
+  color: #ffc107;
+  border-color: #ffc107;
+  background: #fff8e1;
+}
+
+.schedule-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.schedule-column {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  width: 100%;
+}
+
+.section-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #1976d2;
+  border-bottom: 2px solid #1976d2;
+  padding-bottom: 0.5rem;
+  text-align: center;
+}
+
+.trains-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.no-data {
+  text-align: center;
+  color: #999;
+  padding: 1rem;
+  font-style: italic;
+}
+
+.train-card {
+  padding: 0.875rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.train-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.train-number {
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 1rem;
+}
+
+.train-time {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #333;
+}
+
+.train-route {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.route-from {
+  font-weight: 500;
+  color: #333;
+}
+
+.route-arrow {
+  color: #999;
+  font-weight: 300;
+}
+
+.route-to {
+  color: #666;
+}
+
+.train-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.train-direction,
+.train-stops,
+.train-days {
+  font-size: 0.7rem;
+  color: #666;
+  background: #f0f0f0;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.train-platform {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  color: #666;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.schedule-error {
+  padding: 2rem;
+  text-align: center;
+  background: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.error-message {
+  font-weight: 600;
+  color: #c62828;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.error-retry {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  color: #1976d2;
+  background: white;
+  border: 1px solid #1976d2;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.error-retry:hover {
+  background: #e3f2fd;
+}
+
+@media (max-width: 768px) {
+  .schedule-columns {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .schedule-column {
+    padding: 0.75rem;
+  }
+
+  .train-card {
+    padding: 0.75rem;
+  }
+
+  .train-header {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .train-time {
+    font-size: 1rem;
+  }
+
+  .train-route {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .trains-list {
+    max-height: 400px;
+  }
+
+  .schedule-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-column {
+    border-radius: 8px;
+  }
+
+  .section-title {
+    font-size: 0.9rem;
+  }
+}
