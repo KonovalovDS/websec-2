@@ -1,0 +1,23 @@
+.favorite-button {
+  padding: 0.5rem 0.75rem;
+  font-size: 1.25rem;
+  color: #999;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.favorite-button:hover {
+  color: #1976d2;
+  border-color: #1976d2;
+  background: #e3f2fd;
+}
+
+.favorite-button.active {
+  color: #ffc107;
+  border-color: #ffc107;
+  background: #fff8e1;
+}

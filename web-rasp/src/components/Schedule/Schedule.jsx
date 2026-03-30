@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSchedule } from '../../api';
+import { ErrorBlock, LoadingBlock, FavoriteButton } from '../common';
+import TrainCard from './TrainCard';
 import './Schedule.css';
 
 export default function Schedule({ station, isFavorite, onAddFavorite, onRemoveFavorite }) {
@@ -32,34 +34,6 @@ export default function Schedule({ station, isFavorite, onAddFavorite, onRemoveF
     loadSchedule();
   }, [station]);
 
-  const formatTime = (timeValue) => {
-    if (!timeValue) return '—';
-    if (typeof timeValue === 'string' && timeValue.includes('T')) {
-      const date = new Date(timeValue);
-      return date.toLocaleTimeString('ru-RU', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-      });
-    }
-    if (typeof timeValue === 'string') {
-      return timeValue.slice(0, 5);
-    }
-    return '—';
-  };
-
-  const formatDuration = (durationValue) => {
-    if (!durationValue) return '—';
-    const duration = typeof durationValue === 'string' ? parseInt(durationValue, 10) : durationValue;
-    if (isNaN(duration) || duration <= 0) return '—';
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    if (hours > 0) {
-      return `${hours} ч ${minutes} мин`;
-    }
-    return `${minutes} мин`;
-  };
-
   if (!station) {
     return (
       <div className="schedule-empty">
@@ -69,18 +43,11 @@ export default function Schedule({ station, isFavorite, onAddFavorite, onRemoveF
   }
 
   if (loading) {
-    return <div className="loading">Загрузка расписания...</div>;
+    return <LoadingBlock message="Загрузка расписания..." />;
   }
 
   if (error) {
-    return (
-      <div className="schedule-error">
-        <div className="error-message">{error}</div>
-        <button onClick={() => setError(null)} className="error-retry">
-          Попробовать снова
-        </button>
-      </div>
-    );
+    return <ErrorBlock message={error} onRetry={() => setError(null)} />;
   }
 
   if (trains.length === 0) {
@@ -95,63 +62,15 @@ export default function Schedule({ station, isFavorite, onAddFavorite, onRemoveF
     t.thread?.transport_type === 'suburban' && t.arrival && !t.departure
   );
 
-  const parseRoute = (title) => {
-    if (!title) return { from: '—', to: '—' };
-    const parts = title.split(' — ');
-    return {
-      from: parts[0] || '—',
-      to: parts[1] || '—',
-    };
-  };
-
-  const TrainCard = ({ train, type }) => {
-    const route = parseRoute(train.thread?.title);
-    const time = type === 'departing' ? train.departure : train.arrival;
-
-    return (
-      <div className="train-card">
-        <div className="train-header">
-          <span className="train-number">{train.thread?.number || '—'}</span>
-          <span className="train-time">{formatTime(time)}</span>
-        </div>
-
-        <div className="train-route">
-          <span className="route-from">{route.from}</span>
-          <span className="route-arrow">→</span>
-          <span className="route-to">{route.to}</span>
-        </div>
-
-        <div className="train-details">
-          {type === 'departing' && train.direction && (
-            <span className="train-direction">{train.direction}</span>
-          )}
-          {train.stops && train.stops !== 'везде' && (
-            <span className="train-stops">{train.stops}</span>
-          )}
-          {train.days && (
-            <span className="train-days">{train.days}</span>
-          )}
-        </div>
-
-        {train.platform && (
-          <div className="train-platform">Платформа: {train.platform}</div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="schedule">
       <div className="schedule-header">
         <h2 className="schedule-title">Расписание: {station.title}</h2>
         
-        <button
-          className={`favorite-toggle-btn ${isFavorite ? 'active' : ''}`}
-          onClick={isFavorite ? onRemoveFavorite : onAddFavorite}
-          title={isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'}
-        >
-          {isFavorite ? '★' : '☆'}
-        </button>
+        <FavoriteButton
+          isFavorite={isFavorite}
+          onToggle={isFavorite ? onRemoveFavorite : onAddFavorite}
+        />
       </div>
 
       <div className="schedule-columns">

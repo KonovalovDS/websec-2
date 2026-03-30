@@ -83,79 +83,6 @@
   font-style: italic;
 }
 
-.train-card {
-  padding: 0.875rem;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
-.train-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.train-number {
-  font-weight: 600;
-  color: #1976d2;
-  font-size: 1rem;
-}
-
-.train-time {
-  font-weight: 700;
-  font-size: 1.125rem;
-  color: #333;
-}
-
-.train-route {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.85rem;
-}
-
-.route-from {
-  font-weight: 500;
-  color: #333;
-}
-
-.route-arrow {
-  color: #999;
-  font-weight: 300;
-}
-
-.route-to {
-  color: #666;
-}
-
-.train-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.train-direction,
-.train-stops,
-.train-days {
-  font-size: 0.7rem;
-  color: #666;
-  background: #f0f0f0;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-}
-
-.train-platform {
-  margin-top: 0.5rem;
-  font-size: 0.7rem;
-  color: #666;
-  padding-top: 0.5rem;
-  border-top: 1px solid #f0f0f0;
-}
-
 .schedule-error {
   padding: 2rem;
   text-align: center;
@@ -195,25 +122,6 @@
 
   .schedule-column {
     padding: 0.75rem;
-  }
-
-  .train-card {
-    padding: 0.75rem;
-  }
-
-  .train-header {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .train-time {
-    font-size: 1rem;
-  }
-
-  .train-route {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
   }
 
   .trains-list {
