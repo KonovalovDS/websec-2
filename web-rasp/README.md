@@ -53,7 +53,17 @@ CACHE_TTL_SCHEDULE=600
 CACHE_TTL_ROUTES=600
 ```
 
-### 2. Запуск
+### 2. Настройка фронтэнда и конфигурация .env
+
+Пример .env
+
+```bash
+VITE_API_BASE=http://localhost:5000/api
+
+VITE_CACHE_TTL_STATIONS=86400000
+```
+
+### 3. Запуск
 
 #### Терминал 1: Бэкенд
 
@@ -65,5 +75,6 @@ python app.py
 #### Терминал 2: Фронтенд
 
 ```bash
+cd cd client
 npm run dev
 ```
