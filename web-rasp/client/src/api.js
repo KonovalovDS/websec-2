@@ -1,11 +1,21 @@
-import storage from './utils/storage';
+import { storage } from './utils/storage';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+const CACHE_TTL_STATIONS = parseInt(import.meta.env.VITE_CACHE_TTL_STATIONS, 10) || 24 * 60 * 60 * 1000;
+
 const CACHE = {
   stations: null,
   timestamp: null,
-  TTL: 24 * 60 * 60 * 1000,
+  TTL: CACHE_TTL_STATIONS,
 };
+
+class ApiError extends Error {
+  constructor(message, code = 'API_ERROR') {
+    super(message);
+    this.code = code;
+    this.name = 'ApiError';
+  }
+}
 
 async function apiRequest(endpoint, params = {}, timeout = 15000) {
   const query = new URLSearchParams(params);
@@ -20,6 +30,9 @@ async function apiRequest(endpoint, params = {}, timeout = 15000) {
     clearTimeout(timer);
     
     if (!response.ok) {
+      if (response.status === 503 || response.status === 502) {
+        throw new ApiError('Бэкенд недоступен. Запустите сервер Python.', 'BACKEND_OFFLINE');
+      }
       throw new Error(`HTTP ${response.status}`);
     }
     
@@ -31,11 +44,14 @@ async function apiRequest(endpoint, params = {}, timeout = 15000) {
     clearTimeout(timer);
     
     if (err.name === 'AbortError') {
-      throw new Error('Превышено время ожидания ответа');
+      throw new ApiError('Превышено время ожидания ответа', 'TIMEOUT');
     }
     
     if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-      throw new Error('Сервер недоступен.');
+      throw new ApiError(
+        'Не удалось подключиться к серверу.',
+        'BACKEND_OFFLINE'
+      );
     }
     
     throw err;
@@ -74,6 +90,7 @@ function parseStations(data) {
 function loadFromLocalStorage() {
   const data = storage.get('yandex_stations');
   if (!data) return null;
+  
   const { timestamp, stations } = data;
   if (Date.now() - timestamp < CACHE.TTL) {
     return stations;
@@ -170,4 +187,8 @@ export async function getAllStationsForMap() {
     console.error('[API] getAllStationsForMap failed:', err.message);
     throw err;
   }
+}
+
+export function getApiBase() {
+  return API_BASE;
 }

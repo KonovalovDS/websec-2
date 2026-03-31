@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -15,12 +15,12 @@ import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import { fromLonLat } from 'ol/proj';
 import { getAllStationsForMap } from '../../api';
-import layerManager from '../../utils/layerManager';
 import './Map.css';
 
-export default function MapComponent({ onStationSelect, isOpen }) {
+export default function MapComponent({ onStationSelect }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const vectorLayerRef = useRef(null);
   const onStationSelectRef = useRef(onStationSelect);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,13 +35,13 @@ export default function MapComponent({ onStationSelect, isOpen }) {
       if (mapInstance.current) {
         mapInstance.current.setTarget(null);
         mapInstance.current = null;
+        vectorLayerRef.current = null;
       }
-      layerManager.clear();
     };
   }, []);
 
   useEffect(() => {
-    if (!isOpen || !mapRef.current) {
+    if (!mapRef.current) {
       return;
     }
 
@@ -53,7 +53,6 @@ export default function MapComponent({ onStationSelect, isOpen }) {
     const rasterLayer = new TileLayer({
       source: new OSM(),
     });
-    layerManager.register('base', rasterLayer);
 
     const vectorSource = new VectorSource({
       features: [],
@@ -95,7 +94,8 @@ export default function MapComponent({ onStationSelect, isOpen }) {
       source: clusterSource,
       style: clusterStyle,
     });
-    layerManager.register('stations', vectorLayer);
+    
+    vectorLayerRef.current = vectorLayer;
 
     const map = new Map({
       target: mapRef.current,
@@ -175,11 +175,7 @@ export default function MapComponent({ onStationSelect, isOpen }) {
         mapInstance.current.updateSize();
       }
     }, 100);
-  }, [isOpen]);
-
-  if (!isOpen) {
-    return null;
-  }
+  }, []);
 
   return (
     <div className="map-container">

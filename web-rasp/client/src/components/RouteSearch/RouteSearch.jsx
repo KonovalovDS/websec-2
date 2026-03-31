@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { searchStations, searchRoutes } from '../../api';
 import FavoritesList from '../FavoritesList/FavoritesList';
-import RouteCard from './RouteCard';
-import { ErrorBlock, LoadingBlock, SearchInput, FavoriteButton } from '../common';
+import RouteCard from '../RouteCard/RouteCard';
+import ErrorBlock from '../ErrorBlock/ErrorBlock';
+import LoadingBlock from '../LoadingBlock/LoadingBlock';
+import SearchInput from '../SearchInput/SearchInput';
+import FavoriteButton from '../FavoriteButton/FavoriteButton';
 import './RouteSearch.css';
 
 export default function RouteSearch({ 

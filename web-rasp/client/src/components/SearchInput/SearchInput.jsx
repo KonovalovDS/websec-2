@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import StationDropdown from './StationDropdown';
+import StationDropdown from "../StationDropdown/StationDropdown";
 import './SearchInput.css';
 
 export default function SearchInput({ 

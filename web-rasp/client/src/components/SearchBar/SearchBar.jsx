@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { searchStations } from '../../api';
-import { SearchInput } from '../common';
+import SearchInput from '../SearchInput/SearchInput';
 import './SearchBar.css';
 
 export default function SearchBar({ onStationSelect }) {

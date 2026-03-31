@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import storage from './utils/storage';
+import { useState, useEffect } from 'react';
+import { storage } from './utils/storage';
 import SearchBar from './components/SearchBar/SearchBar';
 import Schedule from './components/Schedule/Schedule';
 import MapComponent from './components/Map/Map';
@@ -35,24 +35,24 @@ function App() {
     storage.set('favoriteRoutes', favoriteRoutes);
   }, [favoriteRoutes]);
 
-  const addFavoriteStation = useCallback((station) => {
+  const addFavoriteStation = (station) => {
     setFavoriteStations(prev => {
       if (!prev.find(s => s.code === station.code)) {
         return [...prev, station];
       }
       return prev;
     });
-  }, []);
+  };
 
-  const removeFavoriteStation = useCallback((stationCode) => {
+  const removeFavoriteStation = (stationCode) => {
     setFavoriteStations(prev => prev.filter(s => s.code !== stationCode));
-  }, []);
+  };
 
-  const isStationFavorite = useCallback((stationCode) => {
+  const isStationFavorite = (stationCode) => {
     return favoriteStations.some(s => s.code === stationCode);
-  }, [favoriteStations]);
+  };
 
-  const addFavoriteRoute = useCallback((route) => {
+  const addFavoriteRoute = (route) => {
     setFavoriteRoutes(prev => {
       const routeKey = `${route.from_code}-${route.to_code}`;
       const exists = prev.find(r => `${r.from_code}-${r.to_code}` === routeKey);
@@ -66,29 +66,29 @@ function App() {
       }
       return prev;
     });
-  }, []);
+  };
 
-  const removeFavoriteRouteByKey = useCallback((fromCode, toCode) => {
+  const removeFavoriteRouteByKey = (fromCode, toCode) => {
     setFavoriteRoutes(prev => prev.filter(r => 
       !(r.from_code === fromCode && r.to_code === toCode)
     ));
-  }, []);
+  };
 
-  const isRouteFavorite = useCallback((fromCode, toCode) => {
+  const isRouteFavorite = (fromCode, toCode) => {
     return favoriteRoutes.some(r => r.from_code === fromCode && r.to_code === toCode);
-  }, [favoriteRoutes]);
+  };
 
-  const handleStationSelect = useCallback((station) => {
+  const handleStationSelect = (station) => {
     setSelectedStation(station);
-  }, []);
+  };
 
-  const handleRouteSelect = useCallback((from, to) => {
+  const handleRouteSelect = (from, to) => {
     setSelectedRoute({ from, to });
-  }, []);
+  };
 
-  const toggleMap = useCallback(() => {
+  const toggleMap = () => {
     setIsMapOpen(prev => !prev);
-  }, []);
+  };
 
   return (
     <main className="app">
@@ -122,10 +122,9 @@ function App() {
               </button>
             </div>
 
-            <MapComponent 
-              isOpen={isMapOpen} 
-              onStationSelect={handleStationSelect} 
-            />
+            {isMapOpen && (
+              <MapComponent onStationSelect={handleStationSelect} />
+            )}
 
             {favoriteStations.length > 0 && (
               <FavoritesList
