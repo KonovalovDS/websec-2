@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import storage from './utils/storage';
 import SearchBar from './components/SearchBar/SearchBar';
 import Schedule from './components/Schedule/Schedule';
 import MapComponent from './components/Map/Map';
@@ -15,30 +16,23 @@ function App() {
   const [selectedRoute, setSelectedRoute] = useState(null);
 
   useEffect(() => {
-    const savedStations = localStorage.getItem('favoriteStations');
-    const savedRoutes = localStorage.getItem('favoriteRoutes');
+    const savedStations = storage.get('favoriteStations');
+    const savedRoutes = storage.get('favoriteRoutes');
+    
     if (savedStations) {
-      try {
-        setFavoriteStations(JSON.parse(savedStations));
-      } catch (e) {
-        console.error(e);
-      }
+      setFavoriteStations(savedStations);
     }
     if (savedRoutes) {
-      try {
-        setFavoriteRoutes(JSON.parse(savedRoutes));
-      } catch (e) {
-        console.error(e);
-      }
+      setFavoriteRoutes(savedRoutes);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('favoriteStations', JSON.stringify(favoriteStations));
+    storage.set('favoriteStations', favoriteStations);
   }, [favoriteStations]);
 
   useEffect(() => {
-    localStorage.setItem('favoriteRoutes', JSON.stringify(favoriteRoutes));
+    storage.set('favoriteRoutes', favoriteRoutes);
   }, [favoriteRoutes]);
 
   const addFavoriteStation = useCallback((station) => {
@@ -98,7 +92,7 @@ function App() {
 
   return (
     <main className="app">
-      <h1>Ж/Д Расписания</h1>
+      <h1>Расписание электричек</h1>
 
       <div className="tabs">
         <button

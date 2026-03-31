@@ -1,0 +1,30 @@
+.error-block {
+  padding: 2rem;
+  text-align: center;
+  background: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.error-message {
+  font-weight: 600;
+  color: #c62828;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.error-retry {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  color: #1976d2;
+  background: white;
+  border: 1px solid #1976d2;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.error-retry:hover {
+  background: #e3f2fd;
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSchedule } from '../../api';
-import { ErrorBlock, LoadingBlock, FavoriteButton } from '../common';
 import TrainCard from './TrainCard';
+import { ErrorBlock, LoadingBlock, FavoriteButton } from '../common';
 import './Schedule.css';
 
 export default function Schedule({ station, isFavorite, onAddFavorite, onRemoveFavorite }) {

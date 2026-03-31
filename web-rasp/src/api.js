@@ -1,36 +1,44 @@
-const BASE_URL = '/yandex-api';
-const API_KEY = import.meta.env.VITE_YANDEX_API_KEY;
+import storage from './utils/storage';
 
+const API_BASE = 'http://localhost:5000/api';
 const CACHE = {
   stations: null,
   timestamp: null,
   TTL: 24 * 60 * 60 * 1000,
 };
 
-async function apiRequest(endpoint, params = {}, timeout = 15000, addTransport = true) {
-  const query = new URLSearchParams({ apikey: API_KEY, format: 'json', ...params });
-  
-  if (addTransport && params.transport_types) {
-    query.set('transport_types', Array.isArray(params.transport_types) 
-      ? params.transport_types.join(',') 
-      : params.transport_types);
-  }
+async function apiRequest(endpoint, params = {}, timeout = 15000) {
+  const query = new URLSearchParams(params);
   
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}?${query}`, { signal: controller.signal });
+    const response = await fetch(`${API_BASE}${endpoint}?${query}`, { 
+      signal: controller.signal 
+    });
     clearTimeout(timer);
     
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
     
     const data = await response.json();
-    if (data.error) throw new Error(data.error.text || data.error.message || 'API Error');
+    if (data.error) throw new Error(data.error);
     
     return data;
-  } finally {
+  } catch (err) {
     clearTimeout(timer);
+    
+    if (err.name === 'AbortError') {
+      throw new Error('Превышено время ожидания ответа');
+    }
+    
+    if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      throw new Error('Сервер недоступен.');
+    }
+    
+    throw err;
   }
 }
 
@@ -64,24 +72,20 @@ function parseStations(data) {
 }
 
 function loadFromLocalStorage() {
-  try {
-    const raw = localStorage.getItem('yandex_stations');
-    if (!raw) return null;
-    const { timestamp, stations } = JSON.parse(raw);
-    if (Date.now() - timestamp < CACHE.TTL) {
-      return stations;
-    }
-  } catch {}
+  const data = storage.get('yandex_stations');
+  if (!data) return null;
+  const { timestamp, stations } = data;
+  if (Date.now() - timestamp < CACHE.TTL) {
+    return stations;
+  }
   return null;
 }
 
 function saveToLocalStorage(stations) {
-  try {
-    localStorage.setItem('yandex_stations', JSON.stringify({
-      timestamp: Date.now(),
-      stations,
-    }));
-  } catch {}
+  storage.set('yandex_stations', {
+    timestamp: Date.now(),
+    stations,
+  });
 }
 
 async function ensureStationsCache() {
@@ -94,31 +98,39 @@ async function ensureStationsCache() {
     return cached;
   }
   
-  const data = await apiRequest('/stations_list/', {}, 60000, false);
-  const stations = parseStations(data);
-  
-  CACHE.stations = stations;
-  CACHE.timestamp = Date.now();
-  saveToLocalStorage(stations);
-  
-  return stations;
+  try {
+    const data = await apiRequest('/stations_list/', {}, 60000);
+    const stations = parseStations(data);
+    
+    CACHE.stations = stations;
+    CACHE.timestamp = Date.now();
+    saveToLocalStorage(stations);
+    
+    return stations;
+  } catch (err) {
+    console.error('[API] Failed to load stations:', err.message);
+    throw err;
+  }
 }
 
 export async function searchStations(query, limit = 20) {
   if (!query?.trim || query.trim().length < 2) return [];
-  if (!API_KEY) throw new Error('API key not configured');
   
-  const stations = await ensureStationsCache();
-  const q = query.toLowerCase();
-  
-  return stations
-    .filter(s => s.title?.toLowerCase().includes(q))
-    .slice(0, limit);
+  try {
+    const stations = await ensureStationsCache();
+    const q = query.toLowerCase();
+    
+    return stations
+      .filter(s => s.title?.toLowerCase().includes(q))
+      .slice(0, limit);
+  } catch (err) {
+    console.error('[API] searchStations failed:', err.message);
+    throw err;
+  }
 }
 
 export async function getSchedule(stationCode, date = null) {
   if (!stationCode) throw new Error('Invalid station code');
-  if (!API_KEY) throw new Error('API key not configured');
   
   const params = { 
     station: stationCode,
@@ -127,28 +139,35 @@ export async function getSchedule(stationCode, date = null) {
   if (date) params.date = date;
   
   try {
-    const data = await apiRequest('/schedule/', params, 15000, false);
-    console.log('[API] getSchedule success:', data.schedule?.length || 0, 'trains');
+    const data = await apiRequest('/schedule/', params, 15000);
     return data.schedule || [];
   } catch (err) {
-    console.error('[API] getSchedule failed for', stationCode, ':', err.message);
+    console.error('[API] getSchedule failed:', err.message);
     throw err;
   }
 }
 
 export async function searchRoutes(fromCode, toCode, date = null) {
   if (!fromCode || !toCode || fromCode === toCode) throw new Error('Invalid route');
-  if (!API_KEY) throw new Error('API key not configured');
   
   const params = { from: fromCode, to: toCode };
   if (date) params.date = date;
   
-  const data = await apiRequest('/search/', params, 15000, false);
-  return data.segments || [];
+  try {
+    const data = await apiRequest('/search/', params, 15000);
+    return data.segments || [];
+  } catch (err) {
+    console.error('[API] searchRoutes failed:', err.message);
+    throw err;
+  }
 }
 
 export async function getAllStationsForMap() {
-  if (!API_KEY) throw new Error('API key not configured');
-  const stations = await ensureStationsCache();
-  return stations.filter(s => s.lat && s.lon);
+  try {
+    const stations = await ensureStationsCache();
+    return stations.filter(s => s.lat && s.lon);
+  } catch (err) {
+    console.error('[API] getAllStationsForMap failed:', err.message);
+    throw err;
+  }
 }

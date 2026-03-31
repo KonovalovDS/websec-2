@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { searchStations, searchRoutes } from '../../api';
 import FavoritesList from '../FavoritesList/FavoritesList';
 import RouteCard from './RouteCard';
-import { ErrorBlock, LoadingBlock, SearchInput } from '../common';
+import { ErrorBlock, LoadingBlock, SearchInput, FavoriteButton } from '../common';
 import './RouteSearch.css';
 
 export default function RouteSearch({ 
@@ -134,7 +134,7 @@ export default function RouteSearch({
         </button>
       </div>
 
-      {error && <ErrorBlock message={error} />}
+      {error && <ErrorBlock message={error} onRetry={() => setError(null)} />}
 
       {loading && <LoadingBlock message="Поиск рейсов..." />}
 
@@ -152,14 +152,11 @@ export default function RouteSearch({
           <div className="routes-header">
             <h3 className="routes-title">Найдено рейсов: {routes.length}</h3>
             
-            <button
-              className={`add-favorite-route-btn ${currentRouteIsFavorite ? 'active' : ''}`}
-              onClick={handleToggleFavorite}
+            <FavoriteButton
+              isFavorite={currentRouteIsFavorite}
+              onToggle={handleToggleFavorite}
               title={currentRouteIsFavorite ? 'Удалить из избранного' : 'Добавить в избранное'}
-              disabled={!fromStation || !toStation}
-            >
-              {currentRouteIsFavorite ? '★ В избранном' : '☆ Добавить в избранное'}
-            </button>
+            />
           </div>
           
           {routes.map((route, index) => (

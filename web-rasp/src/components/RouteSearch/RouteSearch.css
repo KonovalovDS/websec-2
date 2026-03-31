@@ -15,17 +15,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: stretch;
-}
-
-.input-group .search-input-wrapper {
-  width: 100%;
 }
 
 .input-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #333;
+  color: #fff;
 }
 
 .search-input {
@@ -45,18 +40,6 @@
 
 .date-input {
   min-width: 150px;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  outline: none;
-  box-sizing: border-box;
-  background: white;
-  cursor: pointer;
-}
-
-.date-input:focus {
-  border-color: #2196f3;
 }
 
 .search-btn {
@@ -100,30 +83,7 @@
 .routes-title {
   margin: 0;
   font-size: 1rem;
-  color: #333;
-}
-
-.add-favorite-route-btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1976d2;
-  background: white;
-  border: 1px solid #1976d2;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  height: 46px;
-}
-
-.add-favorite-route-btn:hover {
-  background: #e3f2fd;
-}
-
-.add-favorite-route-btn.active {
-  color: #ffc107;
-  background: #fff8e1;
-  border-color: #ffc107;
+  color: #fff;
 }
 
 @media (max-width: 1024px) {
@@ -150,9 +110,5 @@
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
-  }
-
-  .add-favorite-route-btn {
-    width: 100%;
   }
 }

@@ -17,7 +17,7 @@ export default function FavoritesList({ type, items, onRemove, onSelect }) {
   return (
     <div className="favorites-list">
       <h3 className="favorites-title">
-        {type === 'stations' ? '⭐ Избранные станции' : '🚌 Избранные маршруты'}
+        {type === 'stations' ? 'Избранные станции' : 'Избранные маршруты'}
       </h3>
       
       <div className="favorites-items">

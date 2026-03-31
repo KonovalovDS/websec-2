@@ -48,43 +48,43 @@ export default function RouteCard({ route, date }) {
       <div className="route-info">
         {route.duration && (
           <div className="route-info-item">
-            <span className="info-label">⏱ В пути</span>
+            <span className="info-label">В пути</span>
             <span className="info-value">{formatDuration(route.duration)}</span>
           </div>
         )}
         {distance && (
           <div className="route-info-item">
-            <span className="info-label">📏 Расстояние</span>
+            <span className="info-label">Расстояние</span>
             <span className="info-value">{distance} км</span>
           </div>
         )}
         {transportType && (
           <div className="route-info-item">
-            <span className="info-label">🚆 Тип</span>
+            <span className="info-label">Тип</span>
             <span className="info-value">{transportType}</span>
           </div>
         )}
         {carrier && (
           <div className="route-info-item">
-            <span className="info-label">🏢 Перевозчик</span>
+            <span className="info-label">Перевозчик</span>
             <span className="info-value">{carrier}</span>
           </div>
         )}
         {vehicle && (
           <div className="route-info-item">
-            <span className="info-label">🚃 Состав</span>
+            <span className="info-label">Состав</span>
             <span className="info-value">{vehicle}</span>
           </div>
         )}
         {platform && (
           <div className="route-info-item">
-            <span className="info-label">📍 Платформа</span>
+            <span className="info-label">Платформа</span>
             <span className="info-value">{platform}</span>
           </div>
         )}
         {days && (
           <div className="route-info-item days-item">
-            <span className="info-label">📅 Дни</span>
+            <span className="info-label">Дни</span>
             <span className="info-value days-value">{days}</span>
           </div>
         )}
@@ -92,7 +92,7 @@ export default function RouteCard({ route, date }) {
 
       {stops.length > 0 && (
         <div className="route-stops-block">
-          <h4 className="stops-title">🛑 Остановки в пути ({stops.length})</h4>
+          <h4 className="stops-title">Остановки в пути ({stops.length})</h4>
           <div className="stops-list">
             {stops.map((stop, i) => {
               const stopTime = stop?.departure || stop?.arrival;

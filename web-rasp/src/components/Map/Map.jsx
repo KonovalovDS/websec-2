@@ -15,6 +15,7 @@ import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import { fromLonLat } from 'ol/proj';
 import { getAllStationsForMap } from '../../api';
+import layerManager from '../../utils/layerManager';
 import './Map.css';
 
 export default function MapComponent({ onStationSelect, isOpen }) {
@@ -35,6 +36,7 @@ export default function MapComponent({ onStationSelect, isOpen }) {
         mapInstance.current.setTarget(null);
         mapInstance.current = null;
       }
+      layerManager.clear();
     };
   }, []);
 
@@ -51,6 +53,7 @@ export default function MapComponent({ onStationSelect, isOpen }) {
     const rasterLayer = new TileLayer({
       source: new OSM(),
     });
+    layerManager.register('base', rasterLayer);
 
     const vectorSource = new VectorSource({
       features: [],
@@ -92,6 +95,7 @@ export default function MapComponent({ onStationSelect, isOpen }) {
       source: clusterSource,
       style: clusterStyle,
     });
+    layerManager.register('stations', vectorLayer);
 
     const map = new Map({
       target: mapRef.current,
